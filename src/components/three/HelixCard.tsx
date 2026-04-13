@@ -11,7 +11,9 @@ interface HelixCardProps {
   position: THREE.Vector3;
   index: number;
   totalCards: number;
-  isActive: boolean;
+  proximity: number; // 0-1 how close the scroll is
+  fanAmount: number; // 0-1 how much the cards should fan out
+  isActive: boolean; // fully active (clickable)
   accentColor: string;
   onSelect: (id: string | null) => void;
   selectedId: string | null;
@@ -22,6 +24,8 @@ export default function HelixCard({
   position,
   index,
   totalCards,
+  proximity,
+  fanAmount,
   isActive,
   accentColor,
   onSelect,
@@ -43,17 +47,18 @@ export default function HelixCard({
 
     const t = clock.elapsedTime;
 
-    // Target position: fan out when active, collapse when inactive
-    const fanRadius = isActive ? 2.2 : 0;
+    // --- Position ---
+    // Fan radius scales with fanAmount (0 = collapsed at helix, 1 = fully fanned)
+    const fanRadius = fanAmount * 2.2;
     const targetX = position.x + Math.cos(fanAngle) * fanRadius;
     const targetY =
-      position.y + (isActive ? index * 0.3 - (totalCards - 1) * 0.15 : 0);
+      position.y +
+      fanAmount * (index * 0.3 - (totalCards - 1) * 0.15);
     const targetZ = position.z + Math.sin(fanAngle) * fanRadius;
 
     // Forward push when selected
     const selectPush = isSelected ? 1.5 : 0;
 
-    // Smooth lerp
     groupRef.current.position.lerp(
       new THREE.Vector3(
         targetX + (isSelected ? Math.cos(fanAngle) * selectPush : 0),
@@ -63,39 +68,48 @@ export default function HelixCard({
       0.06
     );
 
-    // Subtle floating
-    if (isActive) {
-      groupRef.current.position.y += Math.sin(t * 1.5 + index) * 0.003;
+    // Subtle floating when visible
+    if (fanAmount > 0.1) {
+      groupRef.current.position.y +=
+        Math.sin(t * 1.5 + index) * 0.003 * fanAmount;
     }
 
-    // Scale
-    const targetScale = isActive
-      ? isSelected
-        ? 1.2
+    // --- Scale ---
+    // Phase 1 (approach): cards begin to appear small
+    // Phase 2 (active): cards reach full size
+    // Selected: slightly larger
+    let targetScale = 0;
+    if (proximity > 0.15) {
+      const baseScale = Math.min(1, (proximity - 0.15) / 0.4);
+      targetScale = isSelected
+        ? baseScale * 1.15
         : hovered
-        ? 1.05
-        : 0.9
-      : 0.0;
+        ? baseScale * 1.05
+        : baseScale * 0.9;
+    }
+
     const currentScale = groupRef.current.scale.x;
     const newScale = THREE.MathUtils.lerp(currentScale, targetScale, 0.08);
     groupRef.current.scale.setScalar(newScale);
 
-    // Rotation: face outward
-    if (isActive) {
-      const targetRotY = fanAngle + Math.PI;
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(
-        groupRef.current.rotation.y,
-        targetRotY,
-        0.05
-      );
-    }
+    // --- Rotation ---
+    // Cards slowly rotate to face outward as they fan
+    const targetRotY = fanAngle + Math.PI;
+    groupRef.current.rotation.y = THREE.MathUtils.lerp(
+      groupRef.current.rotation.y,
+      fanAmount > 0.1 ? targetRotY : targetRotY + Math.PI * 0.5,
+      0.05
+    );
   });
+
+  const isVisible = proximity > 0.15;
 
   return (
     <group ref={groupRef} position={[position.x, position.y, position.z]}>
       {/* Card mesh */}
       <mesh
         onPointerEnter={(e) => {
+          if (!isActive) return;
           e.stopPropagation();
           setHovered(true);
           document.body.style.cursor = "pointer";
@@ -105,6 +119,7 @@ export default function HelixCard({
           document.body.style.cursor = "default";
         }}
         onClick={(e) => {
+          if (!isActive) return;
           e.stopPropagation();
           onSelect(isSelected ? null : card.id);
         }}
@@ -119,22 +134,30 @@ export default function HelixCard({
           clearcoat={1}
           clearcoatRoughness={0.1}
           emissive={accentColor}
-          emissiveIntensity={hovered || isSelected ? 0.3 : 0.05}
+          emissiveIntensity={
+            isSelected ? 0.4 : hovered ? 0.25 : proximity * 0.1
+          }
         />
       </mesh>
 
-      {/* Card edge glow */}
+      {/* Card edge glow — intensifies during approach */}
       <mesh position={[0, 0, -0.05]}>
         <boxGeometry args={[1.85, 2.25, 0.01]} />
         <meshBasicMaterial
           color={accentColor}
           transparent
-          opacity={isActive ? (hovered || isSelected ? 0.4 : 0.15) : 0}
+          opacity={
+            isSelected
+              ? 0.5
+              : hovered
+              ? 0.35
+              : proximity * 0.2
+          }
         />
       </mesh>
 
       {/* HTML content on the card */}
-      {isActive && (
+      {isVisible && (
         <Html
           transform
           occlude={false}
@@ -143,6 +166,8 @@ export default function HelixCard({
             width: "160px",
             pointerEvents: "none",
             userSelect: "none",
+            opacity: fanAmount,
+            transition: "opacity 0.3s",
           }}
         >
           <div

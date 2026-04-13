@@ -1,7 +1,14 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useState, useMemo, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
+import {
+  EffectComposer,
+  Bloom,
+  Vignette,
+  ChromaticAberration,
+} from "@react-three/postprocessing";
+import { BlendFunction } from "postprocessing";
 import * as THREE from "three";
 import HelixCurve from "./HelixCurve";
 import SectionNode from "./SectionNode";
@@ -73,23 +80,57 @@ export default function HelixScene({
           <HelixCurve progress={progress} />
 
           {/* Section nodes with cards */}
-          {sections.map((section, i) => (
-            <SectionNode
-              key={section.id}
-              section={section}
-              sectionIndex={i}
-              totalSections={sectionCount}
-              isActive={i === activeSection}
-              selectedCardId={i === activeSection ? selectedCardId : null}
-              onSelectCard={onSelectCard}
-            />
-          ))}
+          {sections.map((section, i) => {
+            // Each section center in progress space
+            const sectionCenter =
+              0.08 + ((i + 0.5) / sectionCount) * 0.84;
+            // proximity: 1 = exactly at section, 0 = far away
+            const distance = Math.abs(progress - sectionCenter);
+            const sectionWidth = 0.84 / sectionCount;
+            const proximity = Math.max(
+              0,
+              1 - distance / (sectionWidth * 0.8)
+            );
+
+            return (
+              <SectionNode
+                key={section.id}
+                section={section}
+                sectionIndex={i}
+                totalSections={sectionCount}
+                proximity={proximity}
+                selectedCardId={proximity > 0.3 ? selectedCardId : null}
+                onSelectCard={onSelectCard}
+              />
+            );
+          })}
 
           {/* Background particles */}
           <Particles />
 
           {/* Camera controller */}
           <CameraController progress={progress} />
+
+          {/* Post-processing */}
+          <EffectComposer>
+            <Bloom
+              intensity={1.2}
+              luminanceThreshold={0.2}
+              luminanceSmoothing={0.9}
+              mipmapBlur
+            />
+            <Vignette
+              offset={0.3}
+              darkness={0.7}
+              blendFunction={BlendFunction.NORMAL}
+            />
+            <ChromaticAberration
+              offset={new THREE.Vector2(0.0006, 0.0006)}
+              blendFunction={BlendFunction.NORMAL}
+              radialModulation={false}
+              modulationOffset={0.0}
+            />
+          </EffectComposer>
         </Suspense>
       </Canvas>
     </div>

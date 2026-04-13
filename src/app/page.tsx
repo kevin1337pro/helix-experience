@@ -7,6 +7,7 @@ import HeroOverlay from "@/components/ui/HeroOverlay";
 import NavigationDots from "@/components/ui/NavigationDots";
 import SectionTitle from "@/components/ui/SectionTitle";
 import CardDetailPanel from "@/components/ui/CardDetailPanel";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 import { sections } from "@/data/sections";
 
 // Dynamically import the 3D scene (no SSR — Three.js needs the browser)
@@ -18,6 +19,7 @@ export default function Home() {
   const progress = useScrollProgress();
   const [activeSection, setActiveSection] = useState(0);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleActiveSection = useCallback((idx: number) => {
     setActiveSection(idx);
@@ -25,6 +27,12 @@ export default function Home() {
 
   const handleSelectCard = useCallback((id: string | null) => {
     setSelectedCardId(id);
+  }, []);
+
+  // Simulate loading time for 3D assets to initialize
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 2200);
+    return () => clearTimeout(timer);
   }, []);
 
   // Track mouse position for camera parallax
@@ -44,6 +52,9 @@ export default function Home() {
 
   return (
     <>
+      {/* Loading screen */}
+      <LoadingScreen isLoading={isLoading} />
+
       {/* Scroll spacer — the page needs height to scroll through */}
       <div className="relative" style={{ height: "600vh" }} />
 
@@ -56,13 +67,17 @@ export default function Home() {
       />
 
       {/* Hero overlay */}
-      <HeroOverlay visible={showHero} />
+      {!isLoading && <HeroOverlay visible={showHero} />}
 
       {/* Navigation dots (right side) */}
-      {!showHero && <NavigationDots activeIndex={activeSection} />}
+      {!isLoading && !showHero && (
+        <NavigationDots activeIndex={activeSection} />
+      )}
 
       {/* Section title (bottom center) */}
-      {!showHero && <SectionTitle activeIndex={activeSection} />}
+      {!isLoading && !showHero && (
+        <SectionTitle activeIndex={activeSection} />
+      )}
 
       {/* Card detail panel (left side) */}
       <CardDetailPanel
