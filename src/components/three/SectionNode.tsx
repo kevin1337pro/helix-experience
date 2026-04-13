@@ -17,11 +17,14 @@ import HelixCard from "./HelixCard";
  *   falling back = transition (cards retract into helix)
  */
 
+const MAX_MOBILE_CARDS = 2;
+
 interface SectionNodeProps {
   section: SectionData;
   sectionIndex: number;
   totalSections: number;
   proximity: number;
+  isMobile?: boolean;
   selectedCardId: string | null;
   onSelectCard: (id: string | null) => void;
 }
@@ -31,6 +34,7 @@ export default function SectionNode({
   sectionIndex,
   totalSections,
   proximity,
+  isMobile = false,
   selectedCardId,
   onSelectCard,
 }: SectionNodeProps) {
@@ -44,24 +48,26 @@ export default function SectionNode({
   const isApproaching = proximity > 0.2;
   const isActive = proximity > 0.5;
 
-  // Fan amount: 0 when dormant, ramps up during approach, full at active
   const fanAmount = isActive
     ? 1
     : isApproaching
-    ? (proximity - 0.2) / 0.3 // 0→1 during approach phase
+    ? (proximity - 0.2) / 0.3
     : 0;
+
+  // On mobile: only show the first N cards
+  const visibleCards = isMobile
+    ? section.cards.slice(0, MAX_MOBILE_CARDS)
+    : section.cards;
 
   useFrame(({ clock }) => {
     if (!glowRef.current) return;
     const t = clock.elapsedTime;
     const mat = glowRef.current.material as THREE.MeshBasicMaterial;
 
-    // Glow intensity follows proximity
     const basePulse = proximity * 0.5;
     const pulse = basePulse + Math.sin(t * 3) * proximity * 0.2;
     mat.opacity = pulse;
 
-    // Scale grows as user approaches
     const scale = 0.2 + proximity * 0.5 + Math.sin(t * 2) * proximity * 0.08;
     glowRef.current.scale.setScalar(scale);
   });
@@ -74,17 +80,18 @@ export default function SectionNode({
         <meshBasicMaterial color={section.color} transparent opacity={0.1} />
       </mesh>
 
-      {/* Cards */}
-      {section.cards.map((card, i) => (
+      {/* Cards — limited on mobile */}
+      {visibleCards.map((card, i) => (
         <HelixCard
           key={card.id}
           card={card}
           position={basePosition}
           index={i}
-          totalCards={section.cards.length}
+          totalCards={visibleCards.length}
           proximity={proximity}
           fanAmount={fanAmount}
           isActive={isActive}
+          isMobile={isMobile}
           accentColor={section.color}
           onSelect={onSelectCard}
           selectedId={selectedCardId}

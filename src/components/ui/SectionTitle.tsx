@@ -5,14 +5,24 @@ import { sections } from "@/data/sections";
 
 interface SectionTitleProps {
   activeIndex: number;
+  isMobile?: boolean;
 }
 
-export default function SectionTitle({ activeIndex }: SectionTitleProps) {
+export default function SectionTitle({
+  activeIndex,
+  isMobile = false,
+}: SectionTitleProps) {
   const section = sections[activeIndex];
   if (!section) return null;
 
   return (
-    <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50 text-center pointer-events-none">
+    <div
+      className={`fixed z-50 text-center pointer-events-none ${
+        isMobile
+          ? "bottom-36 left-4 right-4"
+          : "bottom-12 left-1/2 -translate-x-1/2"
+      }`}
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key={section.id}
@@ -22,12 +32,18 @@ export default function SectionTitle({ activeIndex }: SectionTitleProps) {
           transition={{ duration: 0.4 }}
         >
           <h2
-            className="text-3xl md:text-4xl font-bold tracking-tight mb-1"
+            className={`font-bold tracking-tight mb-1 ${
+              isMobile ? "text-2xl" : "text-3xl md:text-4xl"
+            }`}
             style={{ color: section.color }}
           >
             {section.title}
           </h2>
-          <p className="text-sm text-white/40 tracking-wide">
+          <p
+            className={`text-white/40 tracking-wide ${
+              isMobile ? "text-xs" : "text-sm"
+            }`}
+          >
             {section.subtitle}
           </p>
         </motion.div>

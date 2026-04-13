@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 import { useScrollProgress } from "@/hooks/useScrollProgress";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import HeroOverlay from "@/components/ui/HeroOverlay";
 import NavigationDots from "@/components/ui/NavigationDots";
 import SectionTitle from "@/components/ui/SectionTitle";
@@ -10,13 +11,13 @@ import CardDetailPanel from "@/components/ui/CardDetailPanel";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import { sections } from "@/data/sections";
 
-// Dynamically import the 3D scene (no SSR — Three.js needs the browser)
 const HelixScene = dynamic(() => import("@/components/three/HelixScene"), {
   ssr: false,
 });
 
 export default function Home() {
   const progress = useScrollProgress();
+  const isMobile = useIsMobile();
   const [activeSection, setActiveSection] = useState(0);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,14 +30,14 @@ export default function Home() {
     setSelectedCardId(id);
   }, []);
 
-  // Simulate loading time for 3D assets to initialize
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 2200);
     return () => clearTimeout(timer);
   }, []);
 
-  // Track mouse position for camera parallax
+  // Mouse parallax — desktop only
   useEffect(() => {
+    if (isMobile) return;
     const handleMouseMove = (e: MouseEvent) => {
       (globalThis as unknown as Record<string, number>).__mouseX =
         (e.clientX / window.innerWidth - 0.5) * 2;
@@ -45,45 +46,46 @@ export default function Home() {
     };
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  }, [isMobile]);
 
   const showHero = progress < 0.06;
   const currentSection = sections[activeSection];
 
   return (
     <>
-      {/* Loading screen */}
       <LoadingScreen isLoading={isLoading} />
 
-      {/* Scroll spacer — the page needs height to scroll through */}
+      {/* Scroll spacer */}
       <div className="relative" style={{ height: "600vh" }} />
 
-      {/* 3D Scene (fixed, fills viewport) */}
+      {/* 3D Scene */}
       <HelixScene
         progress={progress}
+        isMobile={isMobile}
         onActiveSection={handleActiveSection}
         onSelectCard={handleSelectCard}
         selectedCardId={selectedCardId}
       />
 
-      {/* Hero overlay */}
-      {!isLoading && <HeroOverlay visible={showHero} />}
+      {/* Hero */}
+      {!isLoading && <HeroOverlay visible={showHero} isMobile={isMobile} />}
 
-      {/* Navigation dots (right side) */}
+      {/* Navigation dots */}
       {!isLoading && !showHero && (
-        <NavigationDots activeIndex={activeSection} />
+        <NavigationDots activeIndex={activeSection} isMobile={isMobile} />
       )}
 
-      {/* Section title (bottom center) */}
+      {/* Section title */}
       {!isLoading && !showHero && (
-        <SectionTitle activeIndex={activeSection} />
+        <SectionTitle activeIndex={activeSection} isMobile={isMobile} />
       )}
 
-      {/* Card detail panel (left side) */}
+      {/* Card detail panel */}
       <CardDetailPanel
         selectedCardId={selectedCardId}
         onClose={() => setSelectedCardId(null)}
         accentColor={currentSection?.color ?? "#00d4ff"}
+        isMobile={isMobile}
       />
     </>
   );

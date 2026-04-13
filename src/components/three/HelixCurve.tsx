@@ -74,9 +74,10 @@ function buildBridges() {
 
 interface HelixCurveProps {
   progress: number;
+  isMobile?: boolean;
 }
 
-export default function HelixCurve({ progress }: HelixCurveProps) {
+export default function HelixCurve({ progress, isMobile = false }: HelixCurveProps) {
   const strand1Ref = useRef<THREE.Mesh>(null);
   const strand2Ref = useRef<THREE.Mesh>(null);
   const glow1Ref = useRef<THREE.Mesh>(null);
@@ -159,14 +160,15 @@ export default function HelixCurve({ progress }: HelixCurveProps) {
         />
       </mesh>
 
-      {/* === Bridges between strands === */}
-      {bridges.map((bridge, i) => (
-        <Bridge key={i} start={bridge.start} end={bridge.end} index={i} />
-      ))}
+      {/* === Bridges between strands (skip on mobile) === */}
+      {!isMobile &&
+        bridges.map((bridge, i) => (
+          <Bridge key={i} start={bridge.start} end={bridge.end} index={i} />
+        ))}
 
-      {/* Energy flow — stream of particles on each strand */}
-      <EnergyStream progress={progress} offset={0} color="#00d4ff" count={8} />
-      <EnergyStream progress={progress} offset={STRAND_OFFSET} color="#a855f7" count={8} />
+      {/* Energy flow — fewer particles on mobile */}
+      <EnergyStream progress={progress} offset={0} color="#00d4ff" count={isMobile ? 3 : 8} />
+      <EnergyStream progress={progress} offset={STRAND_OFFSET} color="#a855f7" count={isMobile ? 3 : 8} />
     </group>
   );
 }

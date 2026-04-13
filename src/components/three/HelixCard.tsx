@@ -14,6 +14,7 @@ interface HelixCardProps {
   proximity: number; // 0-1 how close the scroll is
   fanAmount: number; // 0-1 how much the cards should fan out
   isActive: boolean; // fully active (clickable)
+  isMobile?: boolean;
   accentColor: string;
   onSelect: (id: string | null) => void;
   selectedId: string | null;
@@ -27,6 +28,7 @@ export default function HelixCard({
   proximity,
   fanAmount,
   isActive,
+  isMobile = false,
   accentColor,
   onSelect,
   selectedId,
@@ -48,8 +50,8 @@ export default function HelixCard({
     const t = clock.elapsedTime;
 
     // --- Position ---
-    // Fan radius scales with fanAmount (0 = collapsed at helix, 1 = fully fanned)
-    const fanRadius = fanAmount * 2.2;
+    // Mobile: wider fan so fewer cards have more space
+    const fanRadius = fanAmount * (isMobile ? 2.8 : 2.2);
     const targetX = position.x + Math.cos(fanAngle) * fanRadius;
     const targetY =
       position.y +
@@ -81,11 +83,12 @@ export default function HelixCard({
     let targetScale = 0;
     if (proximity > 0.15) {
       const baseScale = Math.min(1, (proximity - 0.15) / 0.4);
+      const mobileBoost = isMobile ? 1.15 : 1;
       targetScale = isSelected
-        ? baseScale * 1.15
+        ? baseScale * 1.15 * mobileBoost
         : hovered
-        ? baseScale * 1.05
-        : baseScale * 0.9;
+        ? baseScale * 1.05 * mobileBoost
+        : baseScale * 0.9 * mobileBoost;
     }
 
     const currentScale = groupRef.current.scale.x;
