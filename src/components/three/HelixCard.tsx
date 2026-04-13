@@ -1,0 +1,185 @@
+"use client";
+
+import { useRef, useState } from "react";
+import { useFrame } from "@react-three/fiber";
+import { Html } from "@react-three/drei";
+import * as THREE from "three";
+import type { CardData } from "@/data/sections";
+
+interface HelixCardProps {
+  card: CardData;
+  position: THREE.Vector3;
+  index: number;
+  totalCards: number;
+  isActive: boolean;
+  accentColor: string;
+  onSelect: (id: string | null) => void;
+  selectedId: string | null;
+}
+
+export default function HelixCard({
+  card,
+  position,
+  index,
+  totalCards,
+  isActive,
+  accentColor,
+  onSelect,
+  selectedId,
+}: HelixCardProps) {
+  const groupRef = useRef<THREE.Group>(null);
+  const [hovered, setHovered] = useState(false);
+
+  const isSelected = selectedId === card.id;
+  const isFaded = selectedId !== null && !isSelected;
+
+  // Fan-out angle for this card within the cluster
+  const fanAngle =
+    ((index - (totalCards - 1) / 2) / Math.max(totalCards - 1, 1)) *
+    (Math.PI * 0.6);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+
+    const t = clock.elapsedTime;
+
+    // Target position: fan out when active, collapse when inactive
+    const fanRadius = isActive ? 2.2 : 0;
+    const targetX = position.x + Math.cos(fanAngle) * fanRadius;
+    const targetY =
+      position.y + (isActive ? index * 0.3 - (totalCards - 1) * 0.15 : 0);
+    const targetZ = position.z + Math.sin(fanAngle) * fanRadius;
+
+    // Forward push when selected
+    const selectPush = isSelected ? 1.5 : 0;
+
+    // Smooth lerp
+    groupRef.current.position.lerp(
+      new THREE.Vector3(
+        targetX + (isSelected ? Math.cos(fanAngle) * selectPush : 0),
+        targetY,
+        targetZ + (isSelected ? Math.sin(fanAngle) * selectPush : 0)
+      ),
+      0.06
+    );
+
+    // Subtle floating
+    if (isActive) {
+      groupRef.current.position.y += Math.sin(t * 1.5 + index) * 0.003;
+    }
+
+    // Scale
+    const targetScale = isActive
+      ? isSelected
+        ? 1.2
+        : hovered
+        ? 1.05
+        : 0.9
+      : 0.0;
+    const currentScale = groupRef.current.scale.x;
+    const newScale = THREE.MathUtils.lerp(currentScale, targetScale, 0.08);
+    groupRef.current.scale.setScalar(newScale);
+
+    // Rotation: face outward
+    if (isActive) {
+      const targetRotY = fanAngle + Math.PI;
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(
+        groupRef.current.rotation.y,
+        targetRotY,
+        0.05
+      );
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={[position.x, position.y, position.z]}>
+      {/* Card mesh */}
+      <mesh
+        onPointerEnter={(e) => {
+          e.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerLeave={() => {
+          setHovered(false);
+          document.body.style.cursor = "default";
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect(isSelected ? null : card.id);
+        }}
+      >
+        <boxGeometry args={[1.8, 2.2, 0.08]} />
+        <meshPhysicalMaterial
+          color="#111827"
+          transparent
+          opacity={isFaded ? 0.3 : 0.85}
+          roughness={0.1}
+          metalness={0.5}
+          clearcoat={1}
+          clearcoatRoughness={0.1}
+          emissive={accentColor}
+          emissiveIntensity={hovered || isSelected ? 0.3 : 0.05}
+        />
+      </mesh>
+
+      {/* Card edge glow */}
+      <mesh position={[0, 0, -0.05]}>
+        <boxGeometry args={[1.85, 2.25, 0.01]} />
+        <meshBasicMaterial
+          color={accentColor}
+          transparent
+          opacity={isActive ? (hovered || isSelected ? 0.4 : 0.15) : 0}
+        />
+      </mesh>
+
+      {/* HTML content on the card */}
+      {isActive && (
+        <Html
+          transform
+          occlude={false}
+          position={[0, 0, 0.06]}
+          style={{
+            width: "160px",
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        >
+          <div
+            style={{
+              color: "white",
+              textAlign: "center",
+              fontFamily: "system-ui, sans-serif",
+            }}
+          >
+            <div style={{ fontSize: "28px", marginBottom: "6px" }}>
+              {card.icon}
+            </div>
+            <div
+              style={{
+                fontSize: "13px",
+                fontWeight: 700,
+                marginBottom: "4px",
+                letterSpacing: "0.02em",
+              }}
+            >
+              {card.title}
+            </div>
+            {isSelected && (
+              <div
+                style={{
+                  fontSize: "10px",
+                  opacity: 0.7,
+                  lineHeight: 1.4,
+                  marginTop: "4px",
+                }}
+              >
+                {card.description}
+              </div>
+            )}
+          </div>
+        </Html>
+      )}
+    </group>
+  );
+}
