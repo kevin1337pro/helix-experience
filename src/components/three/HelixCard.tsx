@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import type { CardData } from "@/data/sections";
+import CardIcon from "@/lib/CardIcon";
 
 interface HelixCardProps {
   card: CardData;
@@ -44,7 +45,7 @@ export default function HelixCard({
     ((index - (totalCards - 1) / 2) / Math.max(totalCards - 1, 1)) *
     (Math.PI * 0.6);
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock, camera }) => {
     if (!groupRef.current) return;
 
     const t = clock.elapsedTime;
@@ -95,13 +96,18 @@ export default function HelixCard({
     const newScale = THREE.MathUtils.lerp(currentScale, targetScale, 0.08);
     groupRef.current.scale.setScalar(newScale);
 
-    // --- Rotation ---
-    // Cards slowly rotate to face outward as they fan
-    const targetRotY = fanAngle + Math.PI;
+    // --- Rotation: Billboard towards camera (Y-axis only) ---
+    // Calculate angle from card's world position to camera on XZ plane
+    // so the card's front face always points towards the viewer.
+    const worldPos = groupRef.current.getWorldPosition(new THREE.Vector3());
+    const dx = camera.position.x - worldPos.x;
+    const dz = camera.position.z - worldPos.z;
+    const angleToCamera = Math.atan2(dx, dz);
+
     groupRef.current.rotation.y = THREE.MathUtils.lerp(
       groupRef.current.rotation.y,
-      fanAmount > 0.1 ? targetRotY : targetRotY + Math.PI * 0.5,
-      0.05
+      angleToCamera,
+      0.1
     );
   });
 
@@ -180,8 +186,8 @@ export default function HelixCard({
               fontFamily: "system-ui, sans-serif",
             }}
           >
-            <div style={{ fontSize: "28px", marginBottom: "6px" }}>
-              {card.icon}
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "6px" }}>
+              <CardIcon name={card.icon} size={28} strokeWidth={1.5} color="white" />
             </div>
             <div
               style={{

@@ -25,7 +25,7 @@ export const sections: SectionData[] = [
       {
         id: "vision-1",
         title: "Wer wir sind",
-        icon: "🌐",
+        icon: "Globe",
         description: "Ein Team aus Designern, Entwicklern und Strategen.",
         detail:
           "Wir verbinden Kreativität mit technischer Exzellenz, um digitale Erlebnisse zu schaffen, die begeistern.",
@@ -33,7 +33,7 @@ export const sections: SectionData[] = [
       {
         id: "vision-2",
         title: "Warum wir anders sind",
-        icon: "⚡",
+        icon: "Zap",
         description: "Innovation als Grundprinzip.",
         detail:
           "Wir denken nicht in Templates — wir entwerfen jedes Projekt als einzigartiges Erlebnis.",
@@ -41,7 +41,7 @@ export const sections: SectionData[] = [
       {
         id: "vision-3",
         title: "Unsere Zukunftsvision",
-        icon: "🚀",
+        icon: "Rocket",
         description: "Die Grenze zwischen Web und Realität auflösen.",
         detail:
           "Immersive Erlebnisse, die Marken in den dreidimensionalen Raum bringen.",
@@ -57,7 +57,7 @@ export const sections: SectionData[] = [
       {
         id: "leistungen-1",
         title: "Branding",
-        icon: "🎨",
+        icon: "Palette",
         description: "Markenidentität, die im Gedächtnis bleibt.",
         detail:
           "Von Logo bis Brand Guidelines — wir schaffen visuelle Systeme mit Wiedererkennungswert.",
@@ -65,7 +65,7 @@ export const sections: SectionData[] = [
       {
         id: "leistungen-2",
         title: "Webdesign",
-        icon: "💻",
+        icon: "Monitor",
         description: "Websites, die beeindrucken und konvertieren.",
         detail:
           "Responsive, performant und auf eure Zielgruppe zugeschnitten.",
@@ -73,7 +73,7 @@ export const sections: SectionData[] = [
       {
         id: "leistungen-3",
         title: "App-Entwicklung",
-        icon: "📱",
+        icon: "Smartphone",
         description: "Native und Cross-Platform Apps.",
         detail:
           "iOS, Android und Web — aus einer Hand, mit nahtloser UX.",
@@ -81,7 +81,7 @@ export const sections: SectionData[] = [
       {
         id: "leistungen-4",
         title: "Digital Signage",
-        icon: "🖥️",
+        icon: "TvMinimal",
         description: "Digitale Displays mit Wow-Effekt.",
         detail:
           "Interaktive Installationen und Content-Systeme für den physischen Raum.",
@@ -89,7 +89,7 @@ export const sections: SectionData[] = [
       {
         id: "leistungen-5",
         title: "Content Creation",
-        icon: "🎬",
+        icon: "Clapperboard",
         description: "Inhalte, die Geschichten erzählen.",
         detail:
           "Video, Motion Graphics, 3D-Visualisierungen und mehr.",
@@ -105,7 +105,7 @@ export const sections: SectionData[] = [
       {
         id: "projekte-1",
         title: "Projekt Alpha",
-        icon: "🏗️",
+        icon: "Building2",
         description: "Immersive Brand Experience für einen Global Player.",
         detail:
           "3D-Website mit interaktiver Produktpräsentation — 200% mehr Verweildauer.",
@@ -113,7 +113,7 @@ export const sections: SectionData[] = [
       {
         id: "projekte-2",
         title: "Projekt Beta",
-        icon: "🎯",
+        icon: "Target",
         description: "E-Commerce Relaunch mit Conversion-Fokus.",
         detail:
           "Redesign und Performance-Optimierung — 45% höhere Conversion Rate.",
@@ -121,7 +121,7 @@ export const sections: SectionData[] = [
       {
         id: "projekte-3",
         title: "Projekt Gamma",
-        icon: "🌟",
+        icon: "Sparkles",
         description: "Digital Signage für Flagship Stores.",
         detail:
           "Interaktive Displays in 12 Standorten — vernetzt und in Echtzeit steuerbar.",
@@ -137,7 +137,7 @@ export const sections: SectionData[] = [
       {
         id: "tech-1",
         title: "3D Web Experience",
-        icon: "🌀",
+        icon: "Box",
         description: "Three.js, WebGL und immersive Welten.",
         detail:
           "Wir bringen die dritte Dimension ins Web — performant und auf jedem Gerät.",
@@ -145,7 +145,7 @@ export const sections: SectionData[] = [
       {
         id: "tech-2",
         title: "Automatisierung",
-        icon: "⚙️",
+        icon: "Settings",
         description: "Workflows, die sich selbst optimieren.",
         detail:
           "CI/CD, automatisierte Tests und intelligente Deployment-Pipelines.",
@@ -153,7 +153,7 @@ export const sections: SectionData[] = [
       {
         id: "tech-3",
         title: "CMS & Plattform",
-        icon: "📦",
+        icon: "Blocks",
         description: "Headless CMS für maximale Flexibilität.",
         detail:
           "Content-Management, das sich eurem Workflow anpasst — nicht umgekehrt.",
@@ -161,7 +161,7 @@ export const sections: SectionData[] = [
       {
         id: "tech-4",
         title: "Daten & Analyse",
-        icon: "📊",
+        icon: "BarChart3",
         description: "Datengetriebene Entscheidungen.",
         detail:
           "Analytics, A/B-Testing und Performance-Monitoring in Echtzeit.",
@@ -177,28 +177,28 @@ export const sections: SectionData[] = [
       {
         id: "kontakt-1",
         title: "Kontakt",
-        icon: "✉️",
+        icon: "Mail",
         description: "Schreib uns eine Nachricht.",
         cta: { label: "E-Mail senden", href: "mailto:hello@helix.de" },
       },
       {
         id: "kontakt-2",
         title: "Termin buchen",
-        icon: "📅",
+        icon: "CalendarDays",
         description: "Kostenloses Erstgespräch vereinbaren.",
         cta: { label: "Termin wählen", href: "#" },
       },
       {
         id: "kontakt-3",
         title: "Angebot anfragen",
-        icon: "📋",
+        icon: "FileText",
         description: "Individuelles Angebot erhalten.",
         cta: { label: "Anfrage starten", href: "#" },
       },
       {
         id: "kontakt-4",
         title: "Social",
-        icon: "🔗",
+        icon: "Share2",
         description: "Folge uns auf LinkedIn, Instagram & Co.",
         cta: { label: "Folgen", href: "#" },
       },

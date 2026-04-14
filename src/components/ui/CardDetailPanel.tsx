@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { sections, type CardData } from "@/data/sections";
+import CardIcon from "@/lib/CardIcon";
 
 interface CardDetailPanelProps {
   selectedCardId: string | null;
@@ -64,7 +65,9 @@ export default function CardDetailPanel({
               />
 
               <div className="px-6 pb-8">
-                <div className="text-5xl mb-4">{card.icon}</div>
+                <div className="mb-4">
+                  <CardIcon name={card.icon} size={48} strokeWidth={1.5} className="text-white/90" />
+                </div>
                 <h3 className="text-2xl font-bold text-white mb-3">
                   {card.title}
                 </h3>
@@ -118,7 +121,9 @@ export default function CardDetailPanel({
               style={{ background: accentColor }}
             />
 
-            <div className="text-4xl mb-4">{card.icon}</div>
+            <div className="mb-4">
+              <CardIcon name={card.icon} size={36} strokeWidth={1.5} className="text-white/90" />
+            </div>
             <h3 className="text-2xl font-bold text-white mb-2">
               {card.title}
             </h3>
